@@ -13,7 +13,6 @@ export type TikTokLiveConnectionOptions = {
     ttTargetIdc: string | null;
     signApiKey: string | null;
     authenticateWs: boolean;
-    preferredAgentIds: string[];
     connectWithUniqueId: boolean;
     disableEulerFallbacks: boolean;
 
@@ -36,7 +35,6 @@ export type RoomGiftInfo = any;
 export type FetchSignedWebSocketParams = {
     roomId?: string;
     uniqueId?: string;
-    preferredAgentIds?: string[];
     ttTargetIdc?: string;
     sessionId?: string;
 }

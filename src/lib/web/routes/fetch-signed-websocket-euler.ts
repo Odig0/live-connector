@@ -22,7 +22,6 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
         {
             roomId,
             uniqueId,
-            preferredAgentIds,
             sessionId,
             ttTargetIdc
         }: FetchSignedWebSocketFromEulerRouteParams
@@ -40,7 +39,6 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
             );
         }
 
-        const preferredAgentIdsParam = preferredAgentIds?.join(',') ?? null;
         const resolvedSessionId = sessionId || this.webClient.cookieJar.sessionId;
         const resolvedTtTargetIdc = ttTargetIdc || this.webClient.cookieJar.ttTargetIdc;
 
@@ -77,7 +75,6 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
                 this.webClient.clientParams?.cursor ?? undefined,
                 resolvedSessionId,
                 Config.DEFAULT_HTTP_CLIENT_HEADERS['User-Agent'],
-                preferredAgentIdsParam,
                 resolvedTtTargetIdc,
                 // With the latest version, we now send the im_enter_room payload, so clientEnter should be true
                 false,

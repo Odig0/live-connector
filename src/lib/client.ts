@@ -61,7 +61,6 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
      * @param {object} [options[].websocketHeaders={}] Custom request headers for websocket.client
      * @param {object} [options[].webClientOptions={}] Custom request options for axios. Here you can specify an `httpsAgent` to use a proxy and a `timeout` value for example.
      * @param {object} [options[].websocketOptions={}] Custom request options for websocket.client. Here you can specify an `agent` to use a proxy and a `timeout` value for example.
-     * @param {string[]} [options[].preferredAgentIds=[]] Preferred agent IDs to use for the WebSocket connection. If not specified, the default agent IDs will be used.
      * @param {boolean} [options[].connectWithUniqueId=false] Connect to the live stream using the unique ID instead of the room ID. If `true`, the room ID will be fetched from the TikTok API.
      * @param {boolean} [options[].logFetchFallbackErrors=false] Log errors when falling back to the API or Euler source
      * @param {function} [options[].signedWebSocketProvider] Custom function to fetch the signed WebSocket URL. If not specified, the default function will be used.
@@ -77,7 +76,6 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
 
         // Assign the options
         this.options = {
-            preferredAgentIds: [],
             connectWithUniqueId: false,
             processInitialData: true,
             fetchRoomInfoOnConnect: true,
@@ -250,7 +248,6 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
             {
                 roomId: (roomId || !this.options.connectWithUniqueId) ? this.roomId : undefined,
                 uniqueId: this.options.connectWithUniqueId ? this.uniqueId : undefined,
-                preferredAgentIds: this.options.preferredAgentIds,
                 sessionId: this.options.authenticateWs ? this.options.sessionId : undefined
             }
         );
