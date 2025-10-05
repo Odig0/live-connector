@@ -1,6 +1,6 @@
 {
     "name": "tiktok-live-connector",
-    "version": "2.0.7-beta1",
+    "version": "2.0.8",
     "description": "Node.js library to receive live stream chat events like comments and gifts from TikTok LIVE.",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -8,7 +8,7 @@
         "dist"
     ],
     "engines": {
-        "node": ">=10.0.0"
+        "node": ">=20.0.0"
     },
     "scripts": {
         "build": "tsx update-version.ts && npm run build:copy-package && tsc && tsc-alias",
@@ -19,7 +19,6 @@
         "url": "git+https://github.com/zerodytrash/TikTok-Live-Connector.git"
     },
     "funding": [
-        "https://buymeacoffee.com/isaackogan",
         "https://buymeacoffee.com/zerody"
     ],
     "keywords": [
