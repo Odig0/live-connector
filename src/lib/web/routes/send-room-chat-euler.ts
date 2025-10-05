@@ -1,11 +1,11 @@
 import { Route } from '@/types/route';
-import { IWebcastRoomChatPayload, IWebcastRoomChatRouteResponse } from '@eulerstream/euler-api-sdk';
 import { AxiosRequestConfig } from 'axios';
 import { FetchSignedWebSocketIdentityParameterError, PremiumFeatureError } from '@/types';
+import { WebcastRoomChatPayload, WebcastRoomChatRouteResponse } from '@eulerstream/euler-api-sdk';
 
-export type SendRoomChatFromEulerRouteParams = IWebcastRoomChatPayload & { options?: AxiosRequestConfig };
+export type SendRoomChatFromEulerRouteParams = WebcastRoomChatPayload & { options?: AxiosRequestConfig };
 
-export class SendRoomChatFromEulerRoute extends Route<SendRoomChatFromEulerRouteParams, IWebcastRoomChatRouteResponse> {
+export class SendRoomChatFromEulerRoute extends Route<SendRoomChatFromEulerRouteParams, WebcastRoomChatRouteResponse> {
 
     async call(
         {
@@ -15,7 +15,7 @@ export class SendRoomChatFromEulerRoute extends Route<SendRoomChatFromEulerRoute
             ttTargetIdc,
             options
         }: SendRoomChatFromEulerRouteParams
-    ): Promise<IWebcastRoomChatRouteResponse> {
+    ): Promise<WebcastRoomChatRouteResponse> {
 
         const resolvedSessionId = sessionId || this.webClient.cookieJar.sessionId;
         const resolvedTtTargetIdc = ttTargetIdc || this.webClient.cookieJar.ttTargetIdc;

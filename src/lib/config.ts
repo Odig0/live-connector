@@ -1,4 +1,4 @@
-import { IWebcastConfig } from '@/types/client';
+import { WebcastConfig } from '@/types/client';
 
 
 import { generateDeviceId, userAgentToDevicePreset } from '@/lib/utilities';
@@ -168,7 +168,7 @@ export const Screen: ScreenPreset = (process.env.RANDOMIZE_TIKTOK_SCREEN?.toLowe
 };
 
 
-const Config: IWebcastConfig = {
+const Config: WebcastConfig = {
     TIKTOK_HOST_WEB: 'www.tiktok.com',
     TIKTOK_HOST_WEBCAST: 'webcast.tiktok.com',
     TIKTOK_HTTP_ORIGIN: 'https://www.tiktok.com',

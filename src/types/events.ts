@@ -1,21 +1,41 @@
 import {
     ControlAction,
+    RoomVerifyMessage,
+    WebcastBarrageMessage,
+    WebcastCaptionMessage,
     WebcastChatMessage,
     WebcastControlMessage,
     WebcastEmoteChatMessage,
     WebcastEnvelopeMessage,
     WebcastGiftMessage,
+    WebcastGoalUpdateMessage,
+    WebcastHourlyRankMessage,
+    WebcastImDeleteMessage,
+    WebcastInRoomBannerMessage,
     WebcastLikeMessage,
+    WebcastLinkLayerMessage,
+    WebcastLinkMessage,
     WebcastLinkMicArmies,
     WebcastLinkMicBattle,
+    WebcastLinkMicBattlePunishFinish,
+    WebcastLinkmicBattleTaskMessage,
+    WebcastLinkMicFanTicketMethod,
+    WebcastLinkMicMethod,
     WebcastLiveIntroMessage,
-    WebcastMemberMessage, WebcastPushFrame,
+    WebcastMemberMessage,
+    WebcastMsgDetectMessage,
+    WebcastOecLiveShoppingMessage,
+    WebcastPollMessage,
     WebcastQuestionNewMessage,
+    WebcastRankTextMessage,
+    WebcastRankUpdateMessage,
+    WebcastRoomMessage,
+    WebcastRoomPinMessage,
     WebcastRoomUserSeqMessage,
     WebcastSocialMessage,
-    WebcastSubNotifyMessage
+    WebcastUnauthorizedMemberMessage
 } from '@/types//tiktok-schema';
-import { DecodedWebcastPushFrame, RoomGiftInfo, RoomInfo, WebcastEventMessage, WebcastMessage } from '@/types/client';
+import { DecodedWebcastPushFrame, RoomGiftInfo, RoomInfo, WebcastEventMessage } from '@/types/client';
 import TikTokWsClient from '@/lib/ws/lib/ws-client';
 
 export enum ControlEvent {
@@ -43,7 +63,6 @@ export enum WebcastEvent {
     LIVE_INTRO = 'liveIntro',
     EMOTE = 'emote',
     ENVELOPE = 'envelope',
-    SUBSCRIBE = 'subscribe',
     FOLLOW = 'follow',
     SHARE = 'share',
     STREAM_END = 'streamEnd',
@@ -71,6 +90,9 @@ export enum WebcastEvent {
     ROOM_VERIFY = 'roomVerify',
     LINK_LAYER = 'linkLayer',
     ROOM_PIN = 'roomPin',
+
+    // Added 2.0.8-beta1
+    SUPER_FAN = 'superFan',
 }
 
 
@@ -86,12 +108,14 @@ export type ClientEventMap = {
 
     // Custom Events
     [WebcastEvent.FOLLOW]: EventHandler<WebcastSocialMessage>,
+    [WebcastEvent.SUPER_FAN]: EventHandler<WebcastBarrageMessage>,
     [WebcastEvent.SHARE]: EventHandler<WebcastSocialMessage>,
     [WebcastEvent.STREAM_END]: (event: { action: ControlAction }) => void | Promise<void>,
+    [WebcastEvent.SUPER_FAN]: EventHandler<WebcastBarrageMessage>,
 
     // Control Events
     [ControlEvent.CONNECTED]: EventHandler<TikTokLiveConnectionState>,
-    [ControlEvent.DISCONNECTED]: EventHandler<void>,
+    [ControlEvent.DISCONNECTED]: EventHandler<{ code: number, reason?: string }>,
     [ControlEvent.ERROR]: EventHandler<any>,
     [ControlEvent.WEBSOCKET_DATA]: EventHandler<Uint8Array>,
     [ControlEvent.RAW_DATA]: (type: string, data: Uint8Array) => void | Promise<void>,
@@ -112,31 +136,30 @@ export type ClientEventMap = {
     [WebcastEvent.LIVE_INTRO]: EventHandler<WebcastLiveIntroMessage>,
     [WebcastEvent.EMOTE]: EventHandler<WebcastEmoteChatMessage>,
     [WebcastEvent.ENVELOPE]: EventHandler<WebcastEnvelopeMessage>,
-    [WebcastEvent.SUBSCRIBE]: EventHandler<WebcastSubNotifyMessage>,
     [WebcastEvent.CONTROL_MESSAGE]: EventHandler<WebcastControlMessage>,
-    [WebcastEvent.BARRAGE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.HOURLY_RANK]: EventHandler<WebcastMessage>,
+    [WebcastEvent.BARRAGE]: EventHandler<WebcastBarrageMessage>,
+    [WebcastEvent.HOURLY_RANK]: EventHandler<WebcastHourlyRankMessage>,
 
     // New Message Events - Added 2.0.4
-    [WebcastEvent.GOAL_UPDATE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.ROOM_MESSAGE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.CAPTION_MESSAGE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.IM_DELETE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.IN_ROOM_BANNER]: EventHandler<WebcastMessage>,
-    [WebcastEvent.RANK_UPDATE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.POLL_MESSAGE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.RANK_TEXT]: EventHandler<WebcastMessage>,
-    [WebcastEvent.LINK_MIC_BATTLE_PUNISH_FINISH]: EventHandler<WebcastMessage>,
-    [WebcastEvent.LINK_MIC_BATTLE_TASK]: EventHandler<WebcastMessage>,
-    [WebcastEvent.LINK_MIC_FAN_TICKET_METHOD]: EventHandler<WebcastMessage>,
-    [WebcastEvent.LINK_MIC_METHOD]: EventHandler<WebcastMessage>,
-    [WebcastEvent.UNAUTHORIZED_MEMBER]: EventHandler<WebcastMessage>,
-    [WebcastEvent.OEC_LIVE_SHOPPING]: EventHandler<WebcastMessage>,
-    [WebcastEvent.MSG_DETECT]: EventHandler<WebcastMessage>,
-    [WebcastEvent.LINK_MESSAGE]: EventHandler<WebcastMessage>,
-    [WebcastEvent.ROOM_VERIFY]: EventHandler<WebcastMessage>,
-    [WebcastEvent.LINK_LAYER]: EventHandler<WebcastMessage>,
-    [WebcastEvent.ROOM_PIN]: EventHandler<WebcastMessage>,
+    [WebcastEvent.GOAL_UPDATE]: EventHandler<WebcastGoalUpdateMessage>,
+    [WebcastEvent.ROOM_MESSAGE]: EventHandler<WebcastRoomMessage>,
+    [WebcastEvent.CAPTION_MESSAGE]: EventHandler<WebcastCaptionMessage>,
+    [WebcastEvent.IM_DELETE]: EventHandler<WebcastImDeleteMessage>,
+    [WebcastEvent.IN_ROOM_BANNER]: EventHandler<WebcastInRoomBannerMessage>,
+    [WebcastEvent.RANK_UPDATE]: EventHandler<WebcastRankUpdateMessage>,
+    [WebcastEvent.POLL_MESSAGE]: EventHandler<WebcastPollMessage>,
+    [WebcastEvent.RANK_TEXT]: EventHandler<WebcastRankTextMessage>,
+    [WebcastEvent.LINK_MIC_BATTLE_PUNISH_FINISH]: EventHandler<WebcastLinkMicBattlePunishFinish>,
+    [WebcastEvent.LINK_MIC_BATTLE_TASK]: EventHandler<WebcastLinkmicBattleTaskMessage>,
+    [WebcastEvent.LINK_MIC_FAN_TICKET_METHOD]: EventHandler<WebcastLinkMicFanTicketMethod>,
+    [WebcastEvent.LINK_MIC_METHOD]: EventHandler<WebcastLinkMicMethod>,
+    [WebcastEvent.UNAUTHORIZED_MEMBER]: EventHandler<WebcastUnauthorizedMemberMessage>,
+    [WebcastEvent.OEC_LIVE_SHOPPING]: EventHandler<WebcastOecLiveShoppingMessage>,
+    [WebcastEvent.MSG_DETECT]: EventHandler<WebcastMsgDetectMessage>,
+    [WebcastEvent.LINK_MESSAGE]: EventHandler<WebcastLinkMessage>,
+    [WebcastEvent.ROOM_VERIFY]: EventHandler<RoomVerifyMessage>,
+    [WebcastEvent.LINK_LAYER]: EventHandler<WebcastLinkLayerMessage>,
+    [WebcastEvent.ROOM_PIN]: EventHandler<WebcastRoomPinMessage>,
 };
 
 export const WebcastEventMap: Record<BasicWebcastEventMessage, keyof ClientEventMap> = {
@@ -153,7 +176,6 @@ export const WebcastEventMap: Record<BasicWebcastEventMessage, keyof ClientEvent
     'WebcastLiveIntroMessage': WebcastEvent.LIVE_INTRO,
     'WebcastEmoteChatMessage': WebcastEvent.EMOTE,
     'WebcastEnvelopeMessage': WebcastEvent.ENVELOPE,
-    'WebcastSubNotifyMessage': WebcastEvent.SUBSCRIBE,
     'WebcastBarrageMessage': WebcastEvent.BARRAGE,
 
     // New Events - Added 2.0.4

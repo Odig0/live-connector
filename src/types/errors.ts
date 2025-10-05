@@ -68,18 +68,18 @@ export class FetchSignedWebSocketIdentityParameterError extends Error {
 
 export class SignAPIError extends TikTokLiveError {
     public reason: ErrorReason;
-    public readonly logId?: number;
+    public readonly requestId?: string;
     public readonly agentId?: string;
 
     constructor(
         reason: ErrorReason,
-        logId?: number,
+        requestId?: string,
         agentId?: string,
         ...args: (string | undefined)[]
     ) {
         super([`[${reason}]`, ...args].join(' '));
         this.reason = reason;
-        this.logId = logId;
+        this.requestId = requestId;
         this.agentId = agentId;
     }
 
@@ -106,7 +106,7 @@ export class SignatureRateLimitError extends SignAPIError {
     constructor(apiMessage: string | undefined, formatStr: string, response: AxiosResponse) {
         const retryAfter = SignatureRateLimitError.calculateRetryAfter(response);
         const resetTime = SignatureRateLimitError.calculateResetTime(response);
-        const logId = SignatureRateLimitError.parseHeaderNumber(response.headers['X-Log-ID']);
+        const logId = response.headers['X-Log-ID'];
         const agentId = response.headers['X-Agent-ID'];
 
         const formattedMsg = formatStr.replace('%s', retryAfter.toString());

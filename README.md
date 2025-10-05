@@ -238,7 +238,7 @@ For example, here's how you can fetch the rate limits for your current API key:
 
 ```ts
 import { SignConfig } from 'tiktok-live-connector';
-import { IGetRateLimits } from '@eulerstream/euler-api-sdk';
+import { GetRateLimits } from '@eulerstream/euler-api-sdk';
 
 // Configure an API Key
 SignConfig.apiKey = 'your api key'; // An API key created at https://www.eulerstream.com

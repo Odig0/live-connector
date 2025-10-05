@@ -1,5 +1,6 @@
 import { Route } from '@/types/route';
 import { FetchRoomInfoFromApiRouteResponse } from '@/lib/web/routes/fetch-room-info-api-live';
+import fs from 'fs';
 
 export type FetchRoomInfoFromHtmlRouteParams = { uniqueId: string };
 export type FetchRoomInfoFromHtmlRouteResponse = Record<string, any> & {
@@ -26,7 +27,8 @@ export class FetchRoomInfoFromHtmlRoute extends Route<FetchRoomInfoFromHtmlRoute
             throw new Error('Failed to parse SIGI_STATE into JSON. Are you captcha-blocked by TikTok?');
         }
 
-        const liveRoom = sigiState?.LiveRoom;
+        const liveRoom = sigiState?.LiveRoom.liveRoomUserInfo;
+
         if (!liveRoom) {
             throw new Error('Failed to extract the LiveRoom object from SIGI_STATE.');
         }

@@ -3,7 +3,7 @@ import { deserializeMessage } from '@/lib/utilities';
 import CookieJar from '@/lib/web/lib/cookie-jar';
 import { WebcastHttpClientConfig, WebcastHttpClientRequestParams, WebcastMessage } from '@/types/client';
 import Config from '@/lib/config';
-import { ISignTikTokUrlBodyMethodEnum } from '@eulerstream/euler-api-sdk/dist/sdk/api';
+import { SignTikTokUrlBodyMethodEnum } from '@eulerstream/euler-api-sdk/dist/sdk/api';
 import { EulerSigner } from '@/lib';
 
 
@@ -98,14 +98,14 @@ export default class WebcastHttpClient {
 
         // Sign the request. Assumption is if it doesn't throw, it worked.
         if (signRequest) {
-            const signMethod = Object.values(ISignTikTokUrlBodyMethodEnum).includes(method.toUpperCase() as ISignTikTokUrlBodyMethodEnum);
+            const signMethod = Object.values(SignTikTokUrlBodyMethodEnum).includes(method.toUpperCase() as SignTikTokUrlBodyMethodEnum);
             if (!signMethod) {
-                throw new Error(`Invalid method for signing: ${method}. Must be one of ${Object.values(ISignTikTokUrlBodyMethodEnum).join(', ')}`);
+                throw new Error(`Invalid method for signing: ${method}. Must be one of ${Object.values(SignTikTokUrlBodyMethodEnum).join(', ')}`);
             }
 
             const signResponse = await this.webSigner.webcastSign(
                 url,
-                method.toUpperCase() as ISignTikTokUrlBodyMethodEnum,
+                method.toUpperCase() as SignTikTokUrlBodyMethodEnum,
                 this.axiosInstance.defaults.headers['User-Agent'] as string,
                 this.cookieJar.sessionId,
                 this.cookieJar.ttTargetIdc

@@ -3,16 +3,31 @@ import * as tikTokSchema from '@/types/tiktok-schema';
 import { MessageFns, ProtoMessageFetchResult, WebcastPushFrame } from '@/types/tiktok-schema';
 import { ClientOptions } from 'ws';
 
-export type TikTokLiveConnectionOptions = {
+export type TikTokLiveConnectionBundledOptions = {
+    useMobile: true;
+    sessionId: string;
+    ttTargetIdc: string;
+    authenticateWs: true;
+} | {
+    useMobile?: false;
+    sessionId: string;
+    ttTargetIdc: string;
+    authenticateWs: boolean;
+} | {
+    useMobile?: false;
+    sessionId?: null;
+    ttTargetIdc?: null;
+    authenticateWs?: false;
+}
+
+
+export type TikTokLiveConnectionOptions = TikTokLiveConnectionBundledOptions & {
     processInitialData: boolean;
     fetchRoomInfoOnConnect: boolean;
     enableExtendedGiftInfo: boolean;
     enableRequestPolling: boolean;
     requestPollingIntervalMs: number;
-    sessionId: string | null;
-    ttTargetIdc: string | null;
     signApiKey: string | null;
-    authenticateWs: boolean;
     connectWithUniqueId: boolean;
     disableEulerFallbacks: boolean;
 
@@ -28,6 +43,8 @@ export type TikTokLiveConnectionOptions = {
     signedWebSocketProvider?: (props: FetchSignedWebSocketParams) => Promise<ProtoMessageFetchResult>
 }
 
+export type TikTokLiveConstructorConnectionOptions = Partial<TikTokLiveConnectionOptions> & TikTokLiveConnectionBundledOptions
+
 
 export type RoomInfo = Record<string, any> & { data: { status: number } }
 export type RoomGiftInfo = any;
@@ -37,6 +54,7 @@ export type FetchSignedWebSocketParams = {
     uniqueId?: string;
     ttTargetIdc?: string;
     sessionId?: string;
+    useMobile?: boolean;
 }
 
 
@@ -53,7 +71,7 @@ export type DecodedWebcastPushFrame = WebcastPushFrame & {
 }
 
 
-export interface IWebcastConfig {
+export interface WebcastConfig {
     TIKTOK_HOST_WEB: string;
     TIKTOK_HOST_WEBCAST: string;
     TIKTOK_HTTP_ORIGIN: string;

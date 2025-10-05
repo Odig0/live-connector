@@ -16,6 +16,7 @@ import {
     RoomGiftInfo,
     RoomInfo,
     TikTokLiveConnectionOptions,
+    TikTokLiveConstructorConnectionOptions,
     WebSocketParams
 } from '@/types/client';
 import { validateAndNormalizeUniqueId } from '@/lib/utilities';
@@ -29,8 +30,8 @@ import {
     WebcastEvent,
     WebcastEventMap
 } from '@/types/events';
-import { IWebcastRoomChatPayload, IWebcastRoomChatRouteResponse } from '@eulerstream/euler-api-sdk';
-import { ControlAction, ProtoMessageFetchResult } from '@/types';
+import { ControlAction, ProtoMessageFetchResult, WebcastBarrageMessage } from '@/types';
+import { WebcastRoomChatPayload, WebcastRoomChatRouteResponse } from '@eulerstream/euler-api-sdk';
 
 
 export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventEmitter<ClientEventMap>) {
@@ -68,7 +69,7 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
      */
     constructor(
         public readonly uniqueId: string,
-        options?: Partial<TikTokLiveConnectionOptions>,
+        options?: TikTokLiveConstructorConnectionOptions,
         public readonly signer?: EulerSigner
     ) {
         super();
@@ -248,7 +249,9 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
             {
                 roomId: (roomId || !this.options.connectWithUniqueId) ? this.roomId : undefined,
                 uniqueId: this.options.connectWithUniqueId ? this.uniqueId : undefined,
-                sessionId: this.options.authenticateWs ? this.options.sessionId : undefined
+                sessionId: this.options.authenticateWs ? this.options.sessionId : undefined,
+                ttTargetIdc: this.options.authenticateWs ? this.options.ttTargetIdc : undefined,
+                useMobile: this.options.useMobile
             }
         );
 
@@ -275,6 +278,7 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
             ...protoMessageFetchResult.wsParams
         };
 
+        // Create the WebSocket client
         this.wsClient = await this.setupWebsocket(protoMessageFetchResult.wsUrl, wsParams);
 
         // Default app behaviour is to send the im_enter_room message on WebSocket connect
@@ -289,7 +293,7 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
      */
     async disconnect(): Promise<void> {
         if (this.isConnected) {
-            await this.wsClient?.close();
+            this.wsClient?.close();
         }
     }
 
@@ -301,10 +305,10 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
         let errors: any[] = [];
         uniqueId ||= this.uniqueId;
 
-        // Method 1
+// Method 1 (HTML Fallback)
         try {
             const roomInfo = await this.webClient.fetchRoomInfoFromHtml({ uniqueId: uniqueId });
-            const roomId = roomInfo.liveRoomUserInfo.liveRoom.roomId;
+            const roomId = roomInfo.user.roomId;
             if (!roomId) throw new Error('Failed to extract Room ID from HTML.');
             return roomId;
         } catch (ex) {
@@ -327,6 +331,14 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
         if (!this.options.disableEulerFallbacks) {
             try {
                 const response = await this.webClient.fetchRoomIdFromEuler({ uniqueId: uniqueId });
+                if ([403, 402, 401].includes(response.code)) {
+                    throw new Error(
+                        'Failed to retrieve Room ID from Euler Stream, which was made as a last resort due to the previous methods failing. ' +
+                        'This happened due to a >>lack of permission<< for you to use Euler Stream\'s (https://www.eulerstream.com) fallback method. ' +
+                        'If you do not want to use Euler Stream, disable this fallback method by setting the \'disableEulerFallbacks\' option to \'true\'.'
+                    );
+                }
+
                 if (!response.ok) throw new Error(`Failed to retrieve Room ID from Euler due to an error: ${response.message}`);
                 if (!response.room_id) throw new Error('Failed to extract Room ID from Euler.');
                 return response.room_id;
@@ -439,7 +451,7 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
      * @param content Message content to send to the stream
      * @param options Optional parameters for the message (incl. parameter overrides)
      */
-    public async sendMessage(content: string, options?: Partial<Omit<IWebcastRoomChatPayload, 'content'>>): Promise<IWebcastRoomChatRouteResponse> {
+    public async sendMessage(content: string, options?: Partial<Omit<WebcastRoomChatPayload, 'content'>>): Promise<WebcastRoomChatRouteResponse> {
 
         const roomId = options?.roomId || this.roomId;
         if (!roomId) {
@@ -490,9 +502,9 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
             wsClient.on('open', () => {
                 clearTimeout(connectTimeout);
                 wsClient.on('error', (e: any) => this.handleError(e, 'WebSocket Error'));
-                wsClient.on('close', () => {
+                wsClient.on('close', (code, reason) => {
                     this.setDisconnected();
-                    this.emit(ControlEvent.DISCONNECTED);
+                    this.emit(ControlEvent.DISCONNECTED, { code, reason: reason?.toString() });
                 });
                 resolve(wsClient);
             });
@@ -571,6 +583,13 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
                 }
 
                 return this.emit(WebcastEvent.GIFT, data);
+            case 'WebcastBarrageMessage':
+
+                if (data.content?.displayType?.includes('ttlive_superFan')) {
+                    this.emit(WebcastEvent.SUPER_FAN, data);
+                }
+
+                return this.emit(WebcastEvent.BARRAGE, data);
             default:
 
                 // Handle all other events

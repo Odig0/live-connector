@@ -1,7 +1,7 @@
 import { URL } from 'url';
 import { PremiumFeatureError, SignatureMissingTokensError } from '@/types/errors';
 import EulerStreamApiClient, { ClientConfiguration, SignWebcastUrl200Response } from '@eulerstream/euler-api-sdk';
-import { ISignTikTokUrlBodyMethodEnum } from '@eulerstream/euler-api-sdk/dist/sdk/api';
+import { SignTikTokUrlBodyMethodEnum } from '@eulerstream/euler-api-sdk/dist/sdk/api';
 import { SignConfig } from '@/lib';
 
 
@@ -25,7 +25,7 @@ export class EulerSigner extends EulerStreamApiClient {
      */
     public async webcastSign(
         url: string | URL,
-        method: ISignTikTokUrlBodyMethodEnum,
+        method: SignTikTokUrlBodyMethodEnum,
         userAgent: string,
         sessionId?: string,
         ttTargetIdc?: string

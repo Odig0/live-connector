@@ -8,6 +8,7 @@ package TikTok;
 // Heartbeat message
 message HeartbeatMessage {
     uint64 roomId = 1;
+    uint64 sendPacketSeqId = 2;
 }
 
 // Incoming & outbound messages

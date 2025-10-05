@@ -80,9 +80,6 @@ export class WebcastPushConnection extends (TikTokLiveConnection as new (...args
                     case 'WebcastEnvelopeMessage':
                         this.emit(WebcastEvent.ENVELOPE, simplifiedObj);
                         break;
-                    case 'WebcastSubNotifyMessage':
-                        this.emit(WebcastEvent.SUBSCRIBE, simplifiedObj);
-                        break;
                 }
             });
     }

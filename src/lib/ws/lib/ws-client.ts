@@ -22,6 +22,10 @@ type TypedWebSocket = new (...args: any[]) => WebSocket & TypedEventEmitter<Even
 export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
     protected pingInterval: NodeJS.Timeout | null;
 
+    // Incremental sequence ID for messages, goes up for each heartbeat sent, starts at 1
+    // Important for mobile compatibility
+    protected seqId: number = 1;
+
     constructor(
         wsUrl: string,
         cookieJar: CookieJar,
@@ -32,7 +36,6 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
     ) {
         const wsHeaders = { Cookie: cookieJar.getCookieString(), ...(webSocketHeaders || {}) };
         const wsUrlWithParams = `${wsUrl}?${new URLSearchParams(webSocketParams)}${Config.DEFAULT_WS_CLIENT_PARAMS_APPEND_PARAMETER}`;
-
         super(
             wsUrlWithParams,
             {
@@ -44,14 +47,8 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
         );
 
         this.pingInterval = null;
-        this.on('open', this.onOpen.bind(this));
         this.on('message', this.onMessage.bind(this));
         this.on('close', this.onDisconnect.bind(this));
-    }
-
-    protected onOpen() {
-        this.sendHeartbeat();
-        this.pingInterval = setInterval(() => this.sendHeartbeat(), this.webSocketPingIntervalMs);
     }
 
     public get open(): boolean {
@@ -74,6 +71,7 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
     protected onDisconnect() {
         clearInterval(this.pingInterval);
         this.pingInterval = null;
+        this.seqId = 1;
     }
 
     /**
@@ -119,7 +117,7 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
         const { room_id } = this.webSocketParams;
 
         // Create the heartbeat
-        const hb: BinaryWriter = HeartbeatMessage.encode({ roomId: room_id });
+        const hb: BinaryWriter = HeartbeatMessage.encode({ roomId: room_id, sendPacketSeqId: '1' });
 
         // Wrap it in the WebcastPushFrame
         const webcastPushFrame: BinaryWriter = createBaseWebcastPushFrame(
@@ -134,6 +132,7 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
         );
 
         this.sendBytes(Buffer.from(webcastPushFrame.finish()));
+        this.seqId++;
     }
 
     /**
@@ -141,6 +140,7 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
      * @param roomId The room ID to switch to
      */
     public switchRooms(roomId: string): void {
+        this.seqId = 1;
 
         const imEnterRoomMessage: BinaryWriter = WebcastImEnterRoomMessage.encode(
             {
@@ -167,6 +167,10 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
 
         this.sendBytes(Buffer.from(webcastPushFrame.finish()));
 
+        // For mobile compatibility, we should only do the ping heartbeat AFTER connecting to a room
+        // For reference, payload_handler_hb (1000) is the close code if you don't
+        clearInterval(this.pingInterval);
+        this.pingInterval = setInterval(() => this.sendHeartbeat(), this.webSocketPingIntervalMs);
     }
 
 

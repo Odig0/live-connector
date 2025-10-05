@@ -12,6 +12,7 @@ import Config from '@/lib/config';
 import { deserializeMessage } from '@/lib';
 import { FetchSignedWebSocketParams } from '@/types/client';
 import { ProtoMessageFetchResult } from '@/types';
+import { WebcastFetchPlatform } from '@eulerstream/euler-api-sdk';
 
 
 export type FetchSignedWebSocketFromEulerRouteParams = FetchSignedWebSocketParams;
@@ -23,7 +24,8 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
             roomId,
             uniqueId,
             sessionId,
-            ttTargetIdc
+            ttTargetIdc,
+            useMobile
         }: FetchSignedWebSocketFromEulerRouteParams
     ): Promise<ProtoMessageFetchResult> {
 
@@ -77,7 +79,9 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
                 Config.DEFAULT_HTTP_CLIENT_HEADERS['User-Agent'],
                 resolvedTtTargetIdc,
                 // With the latest version, we now send the im_enter_room payload, so clientEnter should be true
-                false,
+                true,
+                undefined,
+                useMobile ? WebcastFetchPlatform.Mobile : WebcastFetchPlatform.Web,
                 {
                     // NOTE: NEVER REMOVE THIS BECAUSE FUCKING AXIOS WILL END UP TRYING TO INTERPRET THE RESPONSE
                     // AS UTF-8 DATA AND YOU WILL FUCKING HATE YOUR LIFE
@@ -103,8 +107,8 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
             throw new PremiumFeatureError(message, 'Error fetching the signed TikTok WebSocket');
         }
 
-        const logId: number | undefined = response.headers['X-Log-Id'] && parseInt(response.headers['X-Log-Id']);
-        const agentId: string | undefined = response.headers['X-Agent-ID'];
+        const logId: string | undefined = response.headers['X-Request-Id'];
+        const agentId: string | undefined = response.headers['X-Agent-Id'];
 
         if (response.status !== 200) {
             let payload: string;

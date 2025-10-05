@@ -825,33 +825,6 @@ message TreasureBoxData {
     uint64 timestamp = 7;
 }
 
-// New Subscriber message
-message WebcastSubNotifyMessage {
-    CommonMessageData common = 1;
-    User user = 2;
-    ExhibitionType exhibitionType = 3;
-    int64 subMonth = 4;
-    SubscribeType subscribe_type = 5;
-    OldSubscribeStatus oldSubscribeStatus = 6;
-    optional MessageType subscribe_message_type = 7;
-    SubscribingStatus subscribingStatus = 8;
-    bool isSend = 9;
-    bool isCustom = 10;
-    GiftSource gift_source = 11;
-    MessageDisplayStyle message_display_style = 12;
-    PublicAreaMessageCommon public_area_message_common = 13;
-    string package_id = 14;
-    EventTracking event_tracking = 15;
-
-    message EventTracking {
-        int64 gift_sub_sender_id = 1;
-        int64 gift_sub_receiver_id = 2;
-        int64 anchor_id = 3;
-        int64 gift_sub_order_create_time = 4;
-    }
-
-}
-
 // ==================================
 // Generic stuff
 
@@ -1036,19 +1009,6 @@ message BaseProtoMessage {
     bool isHistory = 6;
 }
 
-/*message RoomMessage {
-  CommonMessageData common = 1;
-  string content = 2;
-  bool supportLandscape = 3;
-  int64 source = 4;
-  Image icon = 5;
-  Scene scene = 6;
-  bool isWelcome = 7;
-  PublicAreaMessageCommon public_area_common = 8;
-  int64 show_duration_ms = 9;
-  string sub_scene = 10;
-}*/
-
 message WebcastRoomMessage {
     CommonMessageData common = 1;
     string content = 2;
@@ -1192,7 +1152,7 @@ message WebcastImDeleteMessage {
 
 message WebcastInRoomBannerMessage {
     CommonMessageData common = 1;
-    map<string, string> data = 2;
+    string data = 2;
     int32 position = 3;
     int32 action_type = 4;
 }

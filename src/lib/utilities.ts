@@ -10,7 +10,7 @@ import * as zlib from 'node:zlib';
 import * as util from 'node:util';
 import { InvalidSchemaNameError, InvalidUniqueIdError, SchemaDecodeError } from '@/types/errors';
 import { DevicePreset } from '@/lib/config';
-import { BinaryWriter } from '@bufbuild/protobuf/wire';
+import { base64Encode, BinaryWriter } from '@bufbuild/protobuf/wire';
 
 const unzip = util.promisify(zlib.unzip);
 
@@ -45,6 +45,12 @@ export function deserializeMessage<T extends keyof WebcastMessage>(
             }
 
             if (!hasProtoName(message.type)) {
+                if (process.env.DEBUG_DESERIALIZE_XD) {
+                    // WebcastFansEventMessage
+                    console.log('---------------')
+                    console.log(message.type, base64Encode(Buffer.from(message.payload)));
+                    console.log('---------------')
+                }
                 continue;
             }
 
