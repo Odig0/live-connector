@@ -133,7 +133,7 @@ dist
 # JetBrains IDEs
 .idea
 test.ts
-test2.ts
+migrate.ts
 ws-test.ts
 publish.ts
 
