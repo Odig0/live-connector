@@ -41,8 +41,8 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
             );
         }
 
-        const resolvedSessionId = sessionId || this.webClient.cookieJar.sessionId;
-        const resolvedTtTargetIdc = ttTargetIdc || this.webClient.cookieJar.ttTargetIdc;
+        let resolvedSessionId = sessionId || this.webClient.cookieJar.sessionId;
+        let resolvedTtTargetIdc = ttTargetIdc || this.webClient.cookieJar.ttTargetIdc;
 
         if (resolvedSessionId && !resolvedTtTargetIdc) {
             throw new FetchSignedWebSocketIdentityParameterError(
@@ -66,6 +66,9 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
                 );
             }
 
+        } else {
+            resolvedSessionId = undefined;
+            resolvedTtTargetIdc = undefined;
         }
 
         let response: AxiosResponse<ArrayBuffer>;
