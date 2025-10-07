@@ -34,7 +34,7 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
         webSocketOptions: ClientOptions,
         protected webSocketPingIntervalMs: number = 10000
     ) {
-        const wsHeaders = { Cookie: cookieJar.getCookieString(), ...(webSocketHeaders || {}) };
+        const wsHeaders = { ...(webSocketHeaders || {}), Cookie: cookieJar.getCookieString() };
         const wsUrlWithParams = `${wsUrl}?${new URLSearchParams(webSocketParams)}${Config.DEFAULT_WS_CLIENT_PARAMS_APPEND_PARAMETER}`;
         super(
             wsUrlWithParams,
@@ -151,7 +151,7 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
                 identity: 'audience',
                 cursor: '',
                 accountType: '0',
-                enterUniqueId: '',
+                enterUniqueId: '', // Device id, i think
                 filterWelcomeMsg: '0',
                 isAnchorContinueKeepMsg: false
             }
