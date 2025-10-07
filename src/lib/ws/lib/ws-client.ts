@@ -30,11 +30,11 @@ export default class TikTokWsClient extends (WebSocket as TypedWebSocket) {
         wsUrl: string,
         cookieJar: CookieJar,
         protected readonly webSocketParams: WebSocketParams,
-        webSocketHeaders: Record<string, string>,
+        webSocketHeaders: Record<string, string> = {},
         webSocketOptions: ClientOptions,
         protected webSocketPingIntervalMs: number = 10000
     ) {
-        const wsHeaders = { ...(webSocketHeaders || {}), Cookie: cookieJar.getCookieString() };
+        const wsHeaders = { ...webSocketHeaders, Cookie: cookieJar.getCookieString(webSocketHeaders) };
         const wsUrlWithParams = `${wsUrl}?${new URLSearchParams(webSocketParams)}${Config.DEFAULT_WS_CLIENT_PARAMS_APPEND_PARAMETER}`;
         super(
             wsUrlWithParams,

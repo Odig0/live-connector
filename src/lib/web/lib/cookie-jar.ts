@@ -169,17 +169,30 @@ export default class CookieJar {
 
     /**
      * Get the cookie string
+     * @param headers Optional existing headers to merge with
      */
-    public getCookieString(): string {
-        let cookieParams = [];
+    public getCookieString(headers?: Record<string, string>): string {
+        // Start with the current cookies in the jar
+        let cookies: Record<string, string> = { ...this.cookies };
 
-        for (const [cookieName, cookieValue] of Object.entries(this.cookies)) {
+        // If a header was passed in, parse it and merge (existing header cookies overwritten by jar cookies)
+        const cookieHeader = headers?.['Cookie'] || headers?.['cookie'];
+        if (cookieHeader) {
+            const parsedHeaderCookies = this.parseCookie(cookieHeader);
+            // Merge: header first, then overwrite with current cookies
+            cookies = { ...parsedHeaderCookies, ...cookies };
+        }
+
+        // Convert merged cookies into a single header string
+        const cookieParams: string[] = [];
+        for (const [cookieName, cookieValue] of Object.entries(cookies)) {
             if (!cookieValue) continue;
-            cookieParams.push(cookieName + '=' + cookieValue);
+            cookieParams.push(`${cookieName}=${cookieValue}`);
         }
 
         return cookieParams.join('; ');
     }
+
 
 }
 
