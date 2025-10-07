@@ -275,8 +275,12 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
             room_id: this.roomId,
             internal_ext: protoMessageFetchResult.internalExt,
             cursor: protoMessageFetchResult.cursor,
-            ...protoMessageFetchResult.wsParams
         };
+
+        // Filter for only defined params, like web does
+        for (const [key, value] of Object.entries(protoMessageFetchResult.wsParams || [])) {
+            if (value) wsParams[key] = value;
+        }
 
         // Create the WebSocket client
         this.wsClient = await this.setupWebsocket(protoMessageFetchResult.wsUrl, wsParams);
