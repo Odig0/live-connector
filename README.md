@@ -568,13 +568,13 @@ connection.on(WebcastEvent.LIVE_INTRO, (msg) => {
 });
 ```
 
-### `subscribe`
+### `superFan`
 
-Triggers when a user creates a subscription.
+Triggers when a user becomes a Super Fan.
 
 ```ts
-connection.on(WebcastEvent.SUBSCRIBE, (data) => {
-    console.log(data.uniqueId, 'subscribed!');
+connection.on(WebcastEvent.SUPER_FAN, (data) => {
+    console.log('A user became a superfan!');
 });
 ```
 
