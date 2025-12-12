@@ -43,7 +43,9 @@ export type TikTokLiveConnectionOptions = TikTokLiveConnectionBundledOptions & {
     signedWebSocketProvider?: (props: FetchSignedWebSocketParams) => Promise<ProtoMessageFetchResult>
 }
 
-export type TikTokLiveConstructorConnectionOptions = Partial<TikTokLiveConnectionOptions> & TikTokLiveConnectionBundledOptions
+export type TikTokLiveConstructorConnectionOptions =
+    Partial<TikTokLiveConnectionOptions>
+    & TikTokLiveConnectionBundledOptions
 
 
 export type RoomInfo = Record<string, any> & { data: { status: number } }
@@ -113,6 +115,7 @@ export type WebcastEventMessage = {
 
 export interface IWebcastDeserializeConfig {
     skipMessageTypes: (keyof WebcastEventMessage)[];
+    showBase64OnDecodeError: boolean;
 }
 
 
@@ -131,6 +134,7 @@ export type DecodedData = {
 declare module '@/types/tiktok-schema' {
     export interface BaseProtoMessage {
         decodedData?: DecodedData;
+        decodeError?: any;
     }
 
     export interface WebcastGiftMessage {
