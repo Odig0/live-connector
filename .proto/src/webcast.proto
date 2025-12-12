@@ -1152,9 +1152,7 @@ message WebcastImDeleteMessage {
 
 message WebcastInRoomBannerMessage {
     CommonMessageData common = 1;
-    string data = 2;
-    int32 position = 3;
-    int32 action_type = 4;
+    string jsonData = 2;
 }
 
 
