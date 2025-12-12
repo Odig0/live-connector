@@ -27,16 +27,6 @@ and [Battles](#linkmicbattle) can be tracked.
 > display the data in the browser (client-side), you need to transfer the data from the Node.js environment to the
 > browser. You can build a WebSocket server, or use the [Euler WebSocket API](https://www.eulerstream.com/docs/sign-server/websockets) to handle this for you.
 
-> [!WARNING]
-> Due to a change on the part of TikTok, versions prior **v1.1.7** are no longer functional. If you are using one of
-> these versions, upgrade to the latest version using the `npm i tiktok-live-connector` command.
-
-#### Breaking Changes
-
-- `WebcastPushConnection` has been renamed to `TikTokLiveConnection`
-- CommonJS support has been removed
-- Data fetching functions have been renamed
-
 ### Do you prefer other programming languages?
 
 - **Python** rewrite: [TikTokLive](https://github.com/isaackogan/TikTokLive)
