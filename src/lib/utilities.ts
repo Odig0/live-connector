@@ -19,7 +19,8 @@ function hasProtoName(protoName: string): boolean {
 }
 
 export const WebcastDeserializeConfig: IWebcastDeserializeConfig = {
-    skipMessageTypes: []
+    skipMessageTypes: [],
+    showBase64OnDecodeError: true
 };
 
 export function deserializeMessage<T extends keyof WebcastMessage>(
@@ -34,7 +35,13 @@ export function deserializeMessage<T extends keyof WebcastMessage>(
     try {
         deserializedMessage = messageFn.decode(binaryMessage);
     } catch (ex) {
-        throw new SchemaDecodeError(`Failed to decode message type: ${protoName}: ` + (ex as Error).stack);
+        let errStr = `Failed to decode message type: ${protoName}: ` + (ex as Error).stack;
+
+        if (WebcastDeserializeConfig.showBase64OnDecodeError) {
+            errStr += 'Base64 - Use this to create an issue: ' + base64Encode(new Uint8Array(binaryMessage));
+        }
+
+        throw new SchemaDecodeError(errStr);
     }
 
     // Handle ProtoMessageFetchResult nested messages
@@ -46,18 +53,22 @@ export function deserializeMessage<T extends keyof WebcastMessage>(
 
             if (!hasProtoName(message.type)) {
                 if (process.env.DEBUG_DESERIALIZE_XD) {
-                    // WebcastFansEventMessage
-                    console.log('---------------')
+                    console.log('---------------');
                     console.log(message.type, base64Encode(Buffer.from(message.payload)));
-                    console.log('---------------')
+                    console.log('---------------');
                 }
                 continue;
             }
 
-            message.decodedData = {
-                type: message.type as keyof WebcastEventMessage,
-                data: deserializeMessage(message.type as keyof WebcastEventMessage, Buffer.from(message.payload))
-            } as any;
+            // Try to decode nested message, if it fails, store error in decodeError
+            try {
+                message.decodedData = {
+                    type: message.type as keyof WebcastEventMessage,
+                    data: deserializeMessage(message.type as keyof WebcastEventMessage, Buffer.from(message.payload))
+                } as any;
+            } catch (ex) {
+                message.decodeError = ex;
+            }
 
         }
     }
