@@ -4352,9 +4352,7 @@ export interface WebcastImDeleteMessage {
 
 export interface WebcastInRoomBannerMessage {
   common: CommonMessageData | undefined;
-  data: string;
-  position: number;
-  actionType: number;
+  jsonData: string;
 }
 
 export interface WebcastRankUpdateMessage {
@@ -36446,7 +36444,7 @@ export const WebcastImDeleteMessageDecoder: MessageFns<WebcastImDeleteMessage> =
 };
 
 function createBaseWebcastInRoomBannerMessage(): WebcastInRoomBannerMessage {
-  return { common: undefined, data: "", position: 0, actionType: 0 };
+  return { common: undefined, jsonData: "" };
 }
 
 export const WebcastInRoomBannerMessageDecoder: MessageFns<WebcastInRoomBannerMessage> = {
@@ -36454,14 +36452,8 @@ export const WebcastInRoomBannerMessageDecoder: MessageFns<WebcastInRoomBannerMe
     if (message.common !== undefined) {
       CommonMessageDataDecoder.encode(message.common, writer.uint32(10).fork()).join();
     }
-    if (message.data !== "") {
-      writer.uint32(18).string(message.data);
-    }
-    if (message.position !== 0) {
-      writer.uint32(24).int32(message.position);
-    }
-    if (message.actionType !== 0) {
-      writer.uint32(32).int32(message.actionType);
+    if (message.jsonData !== "") {
+      writer.uint32(18).string(message.jsonData);
     }
     return writer;
   },
@@ -36486,23 +36478,7 @@ export const WebcastInRoomBannerMessageDecoder: MessageFns<WebcastInRoomBannerMe
             break;
           }
 
-          message.data = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.position = reader.int32();
-          continue;
-        }
-        case 4: {
-          if (tag !== 32) {
-            break;
-          }
-
-          message.actionType = reader.int32();
+          message.jsonData = reader.string();
           continue;
         }
       }
