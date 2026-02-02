@@ -100,6 +100,31 @@ export default class CookieJar {
     }
 
     /**
+     * Build a session cookie header string for API requests
+     * @param sessionId The session ID (uses stored value if not provided)
+     * @param ttTargetIdc The target IDC (uses stored value if not provided)
+     * @returns Cookie header string or undefined if no session
+     */
+    public buildSessionCookieHeader(sessionId?: string | null, ttTargetIdc?: string | null): string | undefined {
+        const resolvedSessionId = sessionId ?? this.sessionId;
+        const resolvedTtTargetIdc = ttTargetIdc ?? this.ttTargetIdc;
+
+        if (!resolvedSessionId) return undefined;
+
+        const cookies: string[] = [
+            `sessionid=${resolvedSessionId}`,
+            `sessionid_ss=${resolvedSessionId}`,
+            `sid_tt=${resolvedSessionId}`,
+        ];
+
+        if (resolvedTtTargetIdc) {
+            cookies.push(`tt-target-idc=${resolvedTtTargetIdc}`);
+        }
+
+        return cookies.join('; ');
+    }
+
+    /**
      * Read cookies from response headers
      * @param response The axios response
      */

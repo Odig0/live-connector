@@ -31,7 +31,16 @@ import {
     WebcastEventMap
 } from '@/types/events';
 import { ControlAction, ProtoMessageFetchResult, WebcastBarrageMessage } from '@/types';
-import { WebcastRoomChatPayload, WebcastRoomChatRouteResponse } from '@eulerstream/euler-api-sdk';
+import { WebcastRoomChatRouteResponse } from '@eulerstream/euler-api-sdk';
+
+// Backwards-compatible type for sendMessage options (SDK type no longer includes these fields)
+// Supports either sessionId + ttTargetIdc OR oauthToken for authentication
+type SendMessageOptions = {
+    roomId?: string;
+    sessionId?: string;
+    ttTargetIdc?: string;
+    oauthToken?: string;
+};
 
 
 export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventEmitter<ClientEventMap>) {
@@ -85,6 +94,7 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
             requestPollingIntervalMs: 1000,
             sessionId: null,
             ttTargetIdc: null,
+            oauthToken: null,
             signApiKey: null,
             disableEulerFallbacks: false,
 
@@ -109,7 +119,8 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
                 axiosOptions: this.options?.webClientOptions,
                 clientParams: this.options?.webClientParams || {},
                 authenticateWs: this.options?.authenticateWs || false,
-                signApiKey: this.options?.signApiKey ?? undefined
+                signApiKey: this.options?.signApiKey ?? undefined,
+                oauthToken: this.options?.oauthToken ?? undefined
             },
             signer
         );
@@ -455,29 +466,37 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
      * @param content Message content to send to the stream
      * @param options Optional parameters for the message (incl. parameter overrides)
      */
-    public async sendMessage(content: string, options?: Partial<Omit<WebcastRoomChatPayload, 'content'>>): Promise<WebcastRoomChatRouteResponse> {
+    public async sendMessage(content: string, options?: Partial<SendMessageOptions>): Promise<WebcastRoomChatRouteResponse> {
 
         const roomId = options?.roomId || this.roomId;
         if (!roomId) {
             throw new Error('Room ID is required to send a message.');
         }
 
-        const sessionId = options?.sessionId || this.webClient.cookieJar.sessionId;
-        if (!sessionId) {
-            throw new Error('Session ID is required to send a message.');
-        }
+        // Resolve OAuth token (either from options or webClient configuration)
+        const oauthToken = options?.oauthToken || this.webClient.configuration.oauthToken;
 
+        // Resolve session credentials (fallback if no OAuth token)
+        const sessionId = options?.sessionId || this.webClient.cookieJar.sessionId;
         const ttTargetIdc = options?.ttTargetIdc || this.webClient.cookieJar.ttTargetIdc;
-        if (!ttTargetIdc) {
-            throw new Error('ttTargetIdc is required to send a message.');
+
+        // Validate: require either oauthToken OR (sessionId + ttTargetIdc)
+        if (!oauthToken) {
+            if (!sessionId) {
+                throw new Error('Either oauthToken or sessionId is required to send a message.');
+            }
+            if (!ttTargetIdc) {
+                throw new Error('ttTargetIdc is required when using sessionId to send a message.');
+            }
         }
 
         return this.webClient.sendRoomChatFromEuler(
             {
                 content: content,
                 roomId: roomId,
-                sessionId: sessionId,
-                ttTargetIdc: ttTargetIdc
+                sessionId: sessionId || undefined,
+                ttTargetIdc: ttTargetIdc || undefined,
+                oauthToken: oauthToken || undefined
             }
         );
     }

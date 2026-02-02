@@ -3,21 +3,22 @@ import * as tikTokSchema from '@/types/tiktok-schema';
 import { MessageFns, ProtoMessageFetchResult, WebcastPushFrame } from '@/types/tiktok-schema';
 import { ClientOptions } from 'ws';
 
+// Authentication options: either sessionId + ttTargetIdc, oauthToken, or nothing
+// NOTE: At runtime, provide either (sessionId + ttTargetIdc) OR oauthToken, not both
 export type TikTokLiveConnectionBundledOptions = {
+    // Mobile mode requires authentication
     useMobile: true;
-    sessionId: string;
-    ttTargetIdc: string;
+    sessionId?: string | null;
+    ttTargetIdc?: string | null;
+    oauthToken?: string | null;
     authenticateWs: true;
 } | {
+    // Web mode
     useMobile?: false;
-    sessionId: string;
-    ttTargetIdc: string;
-    authenticateWs: boolean;
-} | {
-    useMobile?: false;
-    sessionId?: null;
-    ttTargetIdc?: null;
-    authenticateWs?: false;
+    sessionId?: string | null;
+    ttTargetIdc?: string | null;
+    oauthToken?: string | null;
+    authenticateWs?: boolean;
 }
 
 
@@ -56,6 +57,7 @@ export type FetchSignedWebSocketParams = {
     uniqueId?: string;
     ttTargetIdc?: string;
     sessionId?: string;
+    oauthToken?: string;
     useMobile?: boolean;
 }
 
@@ -66,6 +68,7 @@ export type WebcastHttpClientConfig = {
     clientParams: Record<string, string>;
     authenticateWs?: boolean;
     signApiKey?: string;
+    oauthToken?: string;
 }
 
 export type DecodedWebcastPushFrame = WebcastPushFrame & {

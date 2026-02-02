@@ -25,6 +25,7 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
             uniqueId,
             sessionId,
             ttTargetIdc,
+            oauthToken,
             useMobile
         }: FetchSignedWebSocketFromEulerRouteParams
     ): Promise<ProtoMessageFetchResult> {
@@ -41,16 +42,23 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
             );
         }
 
+        // Resolve OAuth token (either from params or webClient configuration)
+        let resolvedOauthToken = oauthToken || this.webClient.configuration.oauthToken;
+
+        // Resolve session credentials (fallback if no OAuth token)
         let resolvedSessionId = sessionId || this.webClient.cookieJar.sessionId;
         let resolvedTtTargetIdc = ttTargetIdc || this.webClient.cookieJar.ttTargetIdc;
 
-        if (resolvedSessionId && !resolvedTtTargetIdc) {
+        // Validate: if using session auth, ttTargetIdc is required
+        if (!resolvedOauthToken && resolvedSessionId && !resolvedTtTargetIdc) {
             throw new FetchSignedWebSocketIdentityParameterError(
                 'ttTargetIdc must be set when sessionId is provided.'
             );
         }
 
-        if (this.webClient.configuration.authenticateWs && resolvedSessionId) {
+        // Check authentication is allowed when authenticateWs is true
+        const hasAuth = resolvedOauthToken || resolvedSessionId;
+        if (this.webClient.configuration.authenticateWs && hasAuth) {
             const envHost = process.env.WHITELIST_AUTHENTICATED_SESSION_ID_HOST;
             const expectedHost = new URL(this.webClient.webSigner.configuration.basePath).host;
 
@@ -67,24 +75,35 @@ export class FetchSignedWebSocketFromEulerRoute extends Route<FetchSignedWebSock
             }
 
         } else {
+            // Clear auth if not authenticating
+            resolvedOauthToken = undefined;
             resolvedSessionId = undefined;
             resolvedTtTargetIdc = undefined;
         }
 
+        // Build xOauthToken or xCookieHeader based on available auth method
+        // xOauthToken takes precedence over xCookieHeader
+        const xOauthToken = resolvedOauthToken || undefined;
+        const xCookieHeader = !resolvedOauthToken
+            ? this.webClient.cookieJar.buildSessionCookieHeader(resolvedSessionId, resolvedTtTargetIdc)
+            : undefined;
+
         let response: AxiosResponse<ArrayBuffer>;
         try {
             response = await this.webClient.webSigner.webcast.fetchWebcastURL(
-                'ttlive-node',
-                roomId,
-                uniqueId,
-                this.webClient.clientParams?.cursor ?? undefined,
-                resolvedSessionId,
-                Config.DEFAULT_HTTP_CLIENT_HEADERS['User-Agent'],
-                resolvedTtTargetIdc,
+                'ttlive-node',           // client
+                roomId,                  // roomId
+                uniqueId,                // uniqueId
+                this.webClient.clientParams?.cursor ?? undefined,  // cursor
+                Config.DEFAULT_HTTP_CLIENT_HEADERS['User-Agent'],  // userAgent
                 // With the latest version, we now send the im_enter_room payload, so clientEnter should be true
-                true,
-                undefined,
-                useMobile ? WebcastFetchPlatform.Mobile : WebcastFetchPlatform.Web,
+                true,                    // clientEnter
+                undefined,               // country
+                useMobile ? WebcastFetchPlatform.Mobile : WebcastFetchPlatform.Web,  // platform
+                xOauthToken,             // xOauthToken
+                xCookieHeader,           // xCookieHeader
+                undefined,               // sessionId (deprecated)
+                undefined,               // ttTargetIdc (deprecated)
                 {
                     // NOTE: NEVER REMOVE THIS BECAUSE FUCKING AXIOS WILL END UP TRYING TO INTERPRET THE RESPONSE
                     // AS UTF-8 DATA AND YOU WILL FUCKING HATE YOUR LIFE

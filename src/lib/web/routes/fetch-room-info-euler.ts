@@ -7,7 +7,7 @@ export type FetchRoomInfoFromEulerRouteParams = { uniqueId: string, options?: Ax
 export class FetchRoomInfoFromEulerRoute extends Route<FetchRoomInfoFromEulerRouteParams, WebcastRoomInfoRouteResponse> {
 
     async call({ uniqueId, options }): Promise<WebcastRoomInfoRouteResponse> {
-        const fetchResponse = await this.webClient.webSigner.webcast.retrieveRoomInfo(uniqueId, options);
+        const fetchResponse = await this.webClient.webSigner.premium.retrieveRoomInfo(uniqueId, options);
         return fetchResponse.data;
     }
 
