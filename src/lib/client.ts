@@ -574,13 +574,11 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
         switch (type) {
 
             case 'WebcastSocialMessage':
-                const socialDisplayType = data.common?.displayText?.displayType?.toLowerCase() || '';
-
-                if (socialDisplayType.includes('follow')) {
+                if (data.common.displayText.displayType?.includes('follow')) {
                     return this.emit(WebcastEvent.FOLLOW, data);
                 }
 
-                if (socialDisplayType.includes('share')) {
+                if (data.common.displayText.displayType?.includes('share')) {
                     return this.emit(WebcastEvent.SHARE, data);
                 }
 
