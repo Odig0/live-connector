@@ -93,6 +93,7 @@ export enum WebcastEvent {
 
     // Added 2.0.8-beta1
     SUPER_FAN = 'superFan',
+    SUPER_FAN_BOX = 'superFanBox',
 }
 
 
@@ -109,9 +110,9 @@ export type ClientEventMap = {
     // Custom Events
     [WebcastEvent.FOLLOW]: EventHandler<WebcastSocialMessage>,
     [WebcastEvent.SUPER_FAN]: EventHandler<WebcastBarrageMessage>,
+    [WebcastEvent.SUPER_FAN_BOX]: EventHandler<WebcastEnvelopeMessage>,
     [WebcastEvent.SHARE]: EventHandler<WebcastSocialMessage>,
     [WebcastEvent.STREAM_END]: (event: { action: ControlAction }) => void | Promise<void>,
-    [WebcastEvent.SUPER_FAN]: EventHandler<WebcastBarrageMessage>,
 
     // Control Events
     [ControlEvent.CONNECTED]: EventHandler<TikTokLiveConnectionState>,

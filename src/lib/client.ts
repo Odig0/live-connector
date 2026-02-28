@@ -30,7 +30,7 @@ import {
     WebcastEvent,
     WebcastEventMap
 } from '@/types/events';
-import { ControlAction, ProtoMessageFetchResult, WebcastBarrageMessage } from '@/types';
+import { ControlAction, ProtoMessageFetchResult, EnvelopeBusinessType } from '@/types';
 import { WebcastRoomChatRouteResponse } from '@eulerstream/euler-api-sdk';
 
 // Backwards-compatible type for sendMessage options (SDK type no longer includes these fields)
@@ -574,12 +574,13 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
         switch (type) {
 
             case 'WebcastSocialMessage':
+                const socialDisplayType = data.common?.displayText?.displayType?.toLowerCase() || '';
 
-                if (data.common.displayText.displayType?.includes('follow')) {
+                if (socialDisplayType.includes('follow')) {
                     return this.emit(WebcastEvent.FOLLOW, data);
                 }
 
-                if (data.common.displayText.displayType?.includes('share')) {
+                if (socialDisplayType.includes('share')) {
                     return this.emit(WebcastEvent.SHARE, data);
                 }
 
@@ -607,12 +608,20 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
 
                 return this.emit(WebcastEvent.GIFT, data);
             case 'WebcastBarrageMessage':
-
-                if (data.content?.displayType?.includes('ttlive_superFan')) {
+                if (data.content?.displayType?.toLowerCase().includes('ttlive_superfan')) {
                     this.emit(WebcastEvent.SUPER_FAN, data);
                 }
 
                 return this.emit(WebcastEvent.BARRAGE, data);
+            case 'WebcastEnvelopeMessage':
+                if (
+                    data.common?.displayText?.displayType?.toLowerCase().includes('ttlive_superfanbox')
+                    || data.envelopeInfo?.businessType === EnvelopeBusinessType.BusinessTypeSuperFanBox
+                ) {
+                    this.emit(WebcastEvent.SUPER_FAN_BOX, data);
+                }
+
+                return this.emit(WebcastEvent.ENVELOPE, data);
             default:
 
                 // Handle all other events
@@ -639,5 +648,3 @@ export class TikTokLiveConnection extends (EventEmitter as new () => TypedEventE
     }
 
 }
-
-
