@@ -332,6 +332,8 @@ connection.on(ControlEvent.CONNECTED, () => console.log("Connected!"));
 - [`WebcastEvent.ROOM_VERIFY`](#roomverify) or `"roomVerify"`
 - [`WebcastEvent.LINK_LAYER`](#linklayer) or `"linkLayer"`
 - [`WebcastEvent.ROOM_PIN`](#roompin) or `"roomPin"`
+- [`WebcastEvent.SUPER_FAN`](#superfan) or `"superFan"`
+- [`WebcastEvent.SUPER_FAN_BOX`](#superfanbox) or `"superFanBox"`
 
 ## Control Events
 
@@ -565,6 +567,16 @@ Triggers when a user becomes a Super Fan.
 ```ts
 connection.on(WebcastEvent.SUPER_FAN, (data) => {
     console.log('A user became a superfan!');
+});
+```
+
+### `superFanBox`
+
+Triggers when a user sends a Super Fan Box.
+
+```ts
+connection.on(WebcastEvent.SUPER_FAN_BOX, (data) => {
+    console.log('A Super Fan Box was sent!', data.envelopeInfo);
 });
 ```
 
