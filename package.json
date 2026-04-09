@@ -11,8 +11,8 @@
         "node": ">=20.0.0"
     },
     "scripts": {
-        "build": "tsx update-version.ts && npm run build:copy-package && tsc && tsc-alias",
-        "build:copy-package": "cpx package.json dist && cpx LICENSE dist"
+        "build": "npx tsx update-version.ts && npm run build:copy-package && npx tsc && npx tsc-alias",
+        "build:copy-package": "npx cpx package.json dist && npx cpx LICENSE dist"
     },
     "repository": {
         "type": "git",
@@ -51,8 +51,10 @@
         "axios": "^1.12.2",
         "callable-instance": "^2.0.0",
         "protobufjs": "^6.11.2",
+        "puppeteer": "^24.40.0",
         "typed-emitter": "^2.1.0",
-        "ws": "^8.18.2"
+        "ws": "^8.18.2",
+        "youtube-live-chat": "^1.0.3"
     },
     "devDependencies": {
         "@babel/cli": "^7.17.0",
