@@ -12,7 +12,10 @@
     },
     "scripts": {
         "build": "npx tsx update-version.ts && npm run build:copy-package && npx tsc && npx tsc-alias",
-        "build:copy-package": "npx cpx package.json dist && npx cpx LICENSE dist"
+        "build:copy-package": "npx cpx package.json dist && npx cpx LICENSE dist",
+        "server": "node server.js",
+        "server:dev": "nodemon server.js",
+        "api:views": "node server.js"
     },
     "repository": {
         "type": "git",
@@ -50,6 +53,7 @@
         "@eulerstream/euler-api-sdk": "0.2.0-beta1",
         "axios": "^1.12.2",
         "callable-instance": "^2.0.0",
+        "express": "^5.2.1",
         "protobufjs": "^6.11.2",
         "puppeteer": "^24.40.0",
         "typed-emitter": "^2.1.0",

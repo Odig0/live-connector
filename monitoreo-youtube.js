@@ -5,7 +5,7 @@ const puppeteer = require('puppeteer');
 
 console.log('📺 MONITOREO YOUTUBE (CON PUPPETEER)\n');
 
-const VIDEO_ID = 'oxT5R6I0N6E';
+const VIDEO_ID = 'ewqlYX6fjLs';
 const VIDEO_URL = `https://www.youtube.com/watch?v=${VIDEO_ID}`;
 
 console.log(`🔗 Accediendo a: ${VIDEO_URL}\n`);
