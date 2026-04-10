@@ -1,0 +1,140 @@
+# Configuración de Dockploy para TikTok Live Connector
+# 
+# Instrucciones:
+# 1. Instala Dockploy: npm install -g dockploy
+# 2. Configura tu servidor remoto en Dockploy
+# 3. Ejecuta: dockploy deploy --config dockploy.json
+
+{
+  "projectName": "tiktok-live-connector",
+  "description": "Monitor de transmisiones en vivo multiplataforma con PostgreSQL",
+  "version": "2.1.1",
+  
+  "deployment": {
+    "host": "your-server.com",
+    "port": 22,
+    "username": "deploy",
+    "password": null,
+    "privateKey": "~/.ssh/id_rsa",
+    "remotePath": "/home/deploy/apps/tiktok-live-connector"
+  },
+
+  "docker": {
+    "compose": {
+      "file": "docker-compose.prod.yml",
+      "project": "tiktok-live",
+      "timeout": 300
+    },
+    
+    "registries": {
+      "default": {
+        "type": "docker",
+        "username": "your-docker-username",
+        "password": "your-docker-password"
+      }
+    }
+  },
+
+  "services": [
+    {
+      "name": "postgres",
+      "image": "postgres:15-alpine",
+      "port": 5432,
+      "environment": {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "your-secure-password",
+        "POSTGRES_DB": "tiktok_live_db"
+      },
+      "volumes": [
+        "postgres_data:/var/lib/postgresql/data"
+      ],
+      "healthCheck": {
+        "test": ["CMD-SHELL", "pg_isready -U postgres"],
+        "interval": 10,
+        "timeout": 5,
+        "retries": 5
+      }
+    },
+    
+    {
+      "name": "pgadmin",
+      "image": "dpage/pgadmin4:latest",
+      "port": 5050,
+      "environment": {
+        "PGADMIN_DEFAULT_EMAIL": "admin@example.com",
+        "PGADMIN_DEFAULT_PASSWORD": "your-secure-password"
+      },
+      "dependsOn": ["postgres"]
+    },
+    
+    {
+      "name": "app",
+      "build": {
+        "context": ".",
+        "dockerfile": "Dockerfile"
+      },
+      "port": 3000,
+      "environment": {
+        "NODE_ENV": "production",
+        "PORT": 3000,
+        "DB_HOST": "postgres",
+        "DB_PORT": 5432,
+        "DB_USER": "postgres",
+        "DB_PASSWORD": "your-secure-password",
+        "DB_NAME": "tiktok_live_db"
+      },
+      "dependsOn": ["postgres"],
+      "healthCheck": {
+        "test": ["CMD", "curl", "-f", "http://localhost:3000/api/views"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    }
+  ],
+
+  "volumes": [
+    {
+      "name": "postgres_data",
+      "driver": "local"
+    }
+  ],
+
+  "networks": [
+    {
+      "name": "tiktok-network",
+      "driver": "bridge"
+    }
+  ],
+
+  "beforeDeploy": [
+    "npm install",
+    "npm run build"
+  ],
+
+  "afterDeploy": [
+    "npm run migrate 2>/dev/null || true"
+  ],
+
+  "backups": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention": 7,
+    "services": ["postgres"]
+  },
+
+  "monitoring": {
+    "enabled": true,
+    "prometheus": true,
+    "grafana": true,
+    "alerting": {
+      "email": "admin@example.com"
+    }
+  },
+
+  "autoDeploy": {
+    "enabled": true,
+    "branch": "main",
+    "webhook": "github"
+  }
+}

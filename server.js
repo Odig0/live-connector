@@ -9,7 +9,21 @@
  */
 
 require('dotenv').config();
-const app = require('./app.js');
+
+// Agregar error handling ANTES de importar app
+console.log('📋 Iniciando carga de módulos...');
+
+let app;
+try {
+  console.log('📦 Cargando app.js...');
+  app = require('./app.js');
+  console.log('✅ app.js cargado correctamente');
+} catch (error) {
+  console.error('❌ ERROR CRÍTICO al cargar app.js:');
+  console.error('Error:', error.message);
+  console.error('Stack:', error.stack);
+  process.exit(1);
+}
 
 // ============================================================================
 // CONFIGURACIÓN DE CANALES
@@ -55,7 +69,7 @@ const server = app.listen(PORT, () => {
   🌐 URL: http://localhost:${PORT}
   📍 Ambiente: ${NODE_ENV}
   
-  � ENDPOINTS:
+  📍 ENDPOINTS:
      • POST http://localhost:${PORT}/api/views
      • GET http://localhost:${PORT}/api/health
   
@@ -77,6 +91,29 @@ const server = app.listen(PORT, () => {
 ╚════════════════════════════════════════════════════╝
   `);
 });
+
+// 🔍 Agregar listeners para debug
+server.on('connection', (conn) => {
+  console.log('✅ Nueva conexión recibida');
+});
+
+server.on('error', (err) => {
+  console.error('❌ Error del servidor:', err.message);
+  console.error('Stack:', err.stack);
+});
+
+server.on('close', () => {
+  console.log('🔴 Servidor cerrado');
+});
+
+// 🔒 Prevenir que Node.js cierre el proceso
+console.log('✅ Servidor listo. El proceso se mantendrá activo...');
+
+// Opcional: Agregar un intervalo para mantener vivo el event loop
+setInterval(() => {
+  // Este intervalo es principalmente para depuración
+  // Ayuda a mantener el event loop activo
+}, 60000); // Cada minuto
 
 // ============================================================================
 // MANEJO DE SEÑALES
@@ -100,10 +137,15 @@ process.on('SIGTERM', () => {
 
 // Manejo de errores no capturados
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Promesa rechazada no manejada:', reason);
+  console.error('❌ Promesa rechazada no manejada:');
+  console.error('Razón:', reason);
+  console.error('Stack:', reason instanceof Error ? reason.stack : 'N/A');
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('❌ Excepción no capturada:', error);
+  console.error('❌ Excepción no capturada:');
+  console.error('Error:', error.message);
+  console.error('Stack:', error.stack);
+  console.log('⚠️  El proceso se cerrará...');
   process.exit(1);
 });

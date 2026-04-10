@@ -4,6 +4,7 @@
 
 const express = require('express');
 const viewsRoutes = require('./src/routes/views.routes.js');
+const liveCountRoutes = require('./src/routes/live-count.routes.js');
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use((req, res, next) => {
 
 // Rutas API
 app.use('/api', viewsRoutes);
+app.use('/api/live', liveCountRoutes);
 
 // Ruta raíz
 app.get('/', (req, res) => {
@@ -30,8 +32,16 @@ app.get('/', (req, res) => {
     name: 'Stream Views Monitor API',
     version: '1.0.0',
     endpoints: {
-      'GET /api/views': 'Obtiene viewers de todos los canales en todas las plataformas',
-      'GET /api/health': 'Health check del servidor'
+      'POST /api/live/create': 'Crear un registro de transmisión',
+      'POST /api/live/create-multiple': 'Crear múltiples registros',
+      'GET /api/live/all': 'Obtener todos los registros',
+      'GET /api/live/platform/:platform': 'Obtener por plataforma (tiktok|facebook|youtube)',
+      'GET /api/live/channel/:channel': 'Obtener por canal',
+      'GET /api/live/date/:date': 'Obtener por fecha (YYYY-MM-DD)',
+      'GET /api/live/summary/:platform/:date': 'Resumen por plataforma y fecha',
+      'POST /api/live/update/:id': 'Actualizar un registro',
+      'DELETE /api/live/delete/:id': 'Eliminar un registro',
+      'GET /api/live/health': 'Verificar conexión a base de datos',
     },
     documentation: 'https://github.com/tu-repo/stream-views-monitor'
   });
