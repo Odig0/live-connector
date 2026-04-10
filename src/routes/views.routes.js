@@ -3,9 +3,30 @@
  */
 
 const express = require('express');
-const { getViewsPost } = require('../controllers/views.controller.js');
+const { getViewsPost, getViewsGet } = require('../controllers/views.controller.js');
 
 const router = express.Router();
+
+/**
+ * GET /api/views
+ * Obtiene viewers guardados en JSON
+ * 
+ * Query params:
+ * ?name=El Deber&platform=youtube
+ * 
+ * Response (200):
+ * {
+ *   "success": true,
+ *   "channel": "El Deber",
+ *   "platform": "youtube",
+ *   "data": {
+ *     "views": 184371,
+ *     "updated_at": "2026-04-10T19:46:50.957Z"
+ *   },
+ *   "timestamp": "2026-04-10T19:46:50.957Z"
+ * }
+ */
+router.get('/views', getViewsGet);
 
 /**
  * POST /api/views

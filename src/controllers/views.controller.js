@@ -217,7 +217,81 @@ async function getViewsPost(req, res) {
     });
     
   } catch (error) {
-    console.error('❌ Error en getViewsPost:', error.message);
+/**
+ * Handler para GET /api/views - Obtiene viewers del JSON
+ * Query params esperados: ?name=El Deber&platform=youtube
+ * Devuelve los datos guardados del cache JSON
+ * @param {object} req - Express request
+ * @param {object} res - Express response
+ */
+function getViewsGet(req, res) {
+  try {
+    const { name, platform } = req.query;
+    
+    // Validar parámetros
+    if (!name || !platform) {
+      return res.status(400).json({
+        success: false,
+        error: 'Se requieren los parámetros: name y platform',
+        example: {
+          url: 'GET /api/views?name=El Deber&platform=youtube'
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Validar platform
+    const validPlatforms = ['youtube', 'tiktok', 'facebook'];
+    if (!validPlatforms.includes(platform.toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        error: `Platform inválido. Debe ser: ${validPlatforms.join(', ')}`,
+        received: platform,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Leer cache JSON
+    const cache = readViewsCache();
+    const platformLower = platform.toLowerCase();
+    
+    // Buscar canal
+    const channel = cache.channels.find(c => c.name === name);
+    
+    if (!channel) {
+      return res.status(404).json({
+        success: false,
+        error: `Canal "${name}" no encontrado en cache`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Buscar plataforma en el canal
+    const platformData = channel[platformLower];
+    
+    if (!platformData) {
+      return res.status(404).json({
+        success: false,
+        error: `No hay datos para ${platformLower} en el canal "${name}"`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    console.log(`✅ GET /api/views - ${name} (${platformLower}): ${platformData.views} vistas`);
+    
+    res.json({
+      success: true,
+      channel: name,
+      platform: platformLower,
+      data: {
+        views: platformData.views,
+        updated_at: platformData.updated_at
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ Error en getViewsGet:', error.message);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -227,5 +301,6 @@ async function getViewsPost(req, res) {
 }
 
 module.exports = {
-  getViewsPost
+  getViewsPost,
+  getViewsGet
 };
